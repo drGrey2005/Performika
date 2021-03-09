@@ -1,0 +1,2 @@
+sc create performika-service binPath=[fullPath.exe]
+sc delete performika-service binPath=[fullPath.exe]
