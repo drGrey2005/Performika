@@ -1,48 +1,27 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using NLog;
 using PerformikaDb;
 using PerformikaLib;
 using PerformikaLib.Entities;
-using Quartz;
 
-namespace PerformikaService.Jobs
+namespace PerformikaService
 {
-	[DisallowConcurrentExecution]
-	public class DataUpdaterJob : IJob
+	public class PerformikaUpdater
 	{
 		private readonly PerformikaPostModule _performikaPostModule;
-		private DbLoader _dbLoader;
-		private ILogger _logger = LogManager.GetCurrentClassLogger();
+		private readonly DbLoader _dbLoader;
+		private readonly ILogger _logger;// = LogManager.GetCurrentClassLogger();
 		private readonly int _loadForMinutes;
-		public DataUpdaterJob(PerformikaPostModule postModule, DbLoader loader, IConfiguration config)
+		public PerformikaUpdater(PerformikaPostModule postModule, DbLoader loader, ILogger logger, int loadForMinutes)
 		{
-			_loadForMinutes = -int.Parse(config["Quartz:LoadForMinutes"]);
+			_loadForMinutes = loadForMinutes;
 			_performikaPostModule = postModule;
+			_logger = logger;
 			_dbLoader = loader;
-		}
-		public async Task Execute(IJobExecutionContext context)
-		{
-			_logger.Info("Инициирована загрузка данных.");
-
-			try
-			{
-				await LoadProgramAsync();
-				await LoadProgramObjectsOneAsync();
-				await LoadProgramObjectsTwoAsync();
-				await LoadProgramObjectsThreeAsync();
-				await LoadRoadRepairAsync();
-				await LoadRoadRepairIssoAsync();
-				await LoadDictIssoAsync();
-			}
-			catch (Exception ex)
-			{
-				_logger.Error(ex, "Ошибка загрузки данных.");
-			}
-
-			_logger.Info("Загрузка данных завершена.");
 		}
 
 		public async Task LoadProgramAsync()
@@ -153,6 +132,5 @@ namespace PerformikaService.Jobs
 				_logger.Error($"Ошибка загрузки загрузки справочников ИССО: '{ex.Message}'.");
 			}
 		}
-
 	}
 }

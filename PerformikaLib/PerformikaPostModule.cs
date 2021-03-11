@@ -500,7 +500,7 @@ namespace PerformikaLib
 		}
 
 		/// <summary>
-		/// Справочние ИССО
+		/// Справочник ИССО
 		/// </summary>
 		/// <param name="offset">Смещение для получения данных (начиная с нуля)</param>
 		/// <param name="pageSize">Количество получаемых данных</param>
@@ -537,6 +537,105 @@ namespace PerformikaLib
 							@operator = 6,
 							fieldValue = dt.ToString("s")+"Z"
 						}
+					}, offset: offset, limit: pageSize
+				));
+
+
+			return entityInfos.Select(info =>
+			{
+				try
+				{
+					return new IssoValue()
+					{
+						ObjectUid = info.Id,
+						AbdmId = int.TryParse(info.Values.TryGetValue("bf4b8088-b6ef-439f-a869-22adbeaff16b", out (string, string) abdmId) ? abdmId.Item1 : "", out int id) ? id : (int?)null,
+						Road = info.Values["8d2a65aa-6ef9-4362-8612-b6d0189b56a3"].Item1,
+						RoadUid = Guid.TryParse(info.Values["8d2a65aa-6ef9-4362-8612-b6d0189b56a3"].Item2, out Guid roadUid) ? roadUid : (Guid?)null,
+						Name = info.Values.TryGetValue("42542927-e583-4cf5-b78e-83388322dbba", out (string, string) name) ? name.Item1 : "",
+						Description = info.Values["5241355a-cc62-4f77-aaca-b3b35ce1dbaf"].Item1,
+						Type = info.Values["2678f881-340d-4b63-ac1e-7d03af20d871"].Item1,
+						TypeUid = Guid.TryParse(info.Values["2678f881-340d-4b63-ac1e-7d03af20d871"].Item2, out Guid typeUid) ? typeUid : (Guid?)null,
+						Region = info.Values["3c88a26a-140a-4222-892b-c14082f0113e"].Item1,
+						RegionUid = Guid.TryParse(info.Values["3c88a26a-140a-4222-892b-c14082f0113e"].Item2, out Guid regionUid) ? regionUid : (Guid?)null,
+						Category = info.Values.TryGetValue("f6e4e97d-675f-4da9-9ea3-46b9432c78b5", out (string, string) category) ? category.Item1 : "",
+						Length = int.TryParse(info.Values.TryGetValue("07cd56f5-6a46-46fc-bfef-2d328273109c", out (string, string) len) ? len.Item1 : "", out int length) ? length : (int?)null,
+						Evaluation = info.Values.TryGetValue("34ccdb7f-67f5-40ad-ad48-36a22b42740e", out (string, string) evaluation) ? evaluation.Item1 : "",
+						RoadSize = int.TryParse(info.Values.TryGetValue("4e98b73d-ba52-4044-a107-95fb6f676995", out (string, string) rSize) ? rSize.Item1 : "", out int roadSize) ? roadSize : (int?)null,
+						BuildReconYear = info.Values.TryGetValue("f10d8eef-5f91-43c7-b424-ed3dda679d24", out (string, string) buildReconYear) ? buildReconYear.Item1 : "",
+						Capacity = int.TryParse(info.Values.TryGetValue("4d952e9f-8913-4599-9f4e-290c5a02cc55", out (string, string) cap) ? cap.Item1 : "", out int capacity) ? capacity : (int?)null,
+						DiagnosticsYear = DateTime.TryParse(info.Values.TryGetValue("8d52b5fb-472e-48f8-ba3c-e8a258303e9a", out (string, string) dYear) ? dYear.Item1 : "", out DateTime diagnosticsYear) ? diagnosticsYear : (DateTime?)null,
+						Fku = info.Values.TryGetValue("e9240e5e-ab13-4dae-ae7a-d7d12e8f6143", out (string, string) fku) ? fku.Item1 : "",
+						FkuUid = Guid.TryParse(info.Values["e9240e5e-ab13-4dae-ae7a-d7d12e8f6143"].Item2, out Guid fkuUid) ? fkuUid : (Guid?)null,
+						ChangeDate = DateTime.Parse(info.Values["c433e697-1ecd-47ce-877c-623aec0cf268"].Item1)
+					};
+				}
+				catch (Exception ex)
+				{
+					_logger.Error($"{ex.Message}\nObject is: {info}");
+					return null;
+				}
+			}).Where(val => true).ToList();
+		}
+
+
+		//todo: Не реализовано, требует доработок
+		/// Справочник участков дорог
+		/// </summary>
+		/// <param name="offset">Смещение для получения данных (начиная с нуля)</param>
+		/// <param name="pageSize">Количество получаемых данных</param>
+		/// <param name="dt">Дата, начиная с которой необходимо получать значения</param>
+		public async Task<List<IssoValue>> GetGetRoadSectionsAsync(int offset, int pageSize, DateTime dt = default)
+		{
+			await LoadDict();
+			List<EntityInfo> entityInfos = await GetEntityInfosAsync($"{BaseUrl}/gridview?definitionId=47794b6a-c72d-4c0a-b0d9-3cb0a2c11813&_=1615360346546",
+				_connector.CreateJsonContent(
+					"06c8d042-c446-484d-87c5-679274d5c716",
+					new List<string>
+					{
+						"f1beb7f0-38c1-4287-a547-a848d40565a9", //ИД
+						"aa2eb18b-b9f0-42db-8881-e727cd43fb26", //Участок магистрали
+						"4a8afdbe-cb5c-4462-87a9-41e77c7b5692", //Регион
+						"ea22090f-7a1c-4ec4-a941-a897037ba01e", //ФКУ
+						"d8a9e430-00ff-4788-8a59-b178cac2beef", //AbdmId
+						"1a78dbdf-0c4f-4217-aabf-a45c3082d851", //Название
+						"49467883-626c-4f22-9c26-553fd0d0e523", //Начало
+						"e9e6ca0d-aa40-49f1-b477-592c6d05aa95", //Начало (приращение)
+						"b477df52-5bbc-48ff-a5bf-63ed215c504d", //Конец
+						"d36044db-fc21-44cc-a5cd-e2947264458f", //Конец (приращение)
+						"01689068-54d8-48f9-b1ec-b6b1f3a9d24f", //Полное наименование
+						"ac849b37-a89c-4123-806a-6f5a3177d237", //LengthReduced
+						"bd658abb-f051-4975-878e-98e814e129ea", //LengthModern
+						"d024eb66-4d94-4bf8-a489-68411325025f", //LengthPaved
+						"a4384386-068c-4984-9041-4536aaeeffa9", //LengthPrimer
+						"67ef89a9-718e-45e5-982b-0adb5df4d111", //LengthIce
+						"bed958e5-5674-421b-9cee-0af707104df0", //LengthLinear
+						"ab532b13-6c20-43c8-86b2-e88d31268ca1", //IsHidden
+						"37fc9b9d-830f-4138-b10b-9a437aa6af9a", //Начало периода
+						"578379c6-712a-4ae0-aca3-21c8e5c759a7", //Конец периода
+						"a2ddfe8c-5810-4a09-976c-64f04dba6270", //GeomId
+						"3de5ad41-4729-48cf-b5a7-1480151908d2", //Удален
+					}, new List<FilterOperator>
+					{
+						new FilterOperator
+						{
+							fieldId = "3de5ad41-4729-48cf-b5a7-1480151908d2",
+							@operator = 1,
+							fieldValue = false
+						},
+						new FilterOperator
+						{
+							fieldId = "3de5ad41-4729-48cf-b5a7-1480151908d2",
+							@operator = 1,
+							fieldValue = null
+						}
+					}, new List<FilterOperator>
+					{
+						//new FilterOperator
+						//{
+						//	fieldId = "c433e697-1ecd-47ce-877c-623aec0cf268",
+						//	@operator = 6,
+						//	fieldValue = dt.ToString("s")+"Z"
+						//}
 					}, offset: offset, limit: pageSize
 				));
 
@@ -623,7 +722,7 @@ namespace PerformikaLib
 					value = (info.Values.TryGetValue("c4be51bd-d231-4bb9-9320-f70b38292c2f", out (string, string) value) ? value.Item1 : "") ?? ""
 				}).ToList();
 
-				dynamic jsonObject = result.Any() ? result : null; 
+				dynamic jsonObject = result.Any() ? result : null;
 				//File.WriteAllText(@"d:/result.json", JsonConvert.SerializeObject(jsonObject));
 				return JsonConvert.SerializeObject(jsonObject);
 			}

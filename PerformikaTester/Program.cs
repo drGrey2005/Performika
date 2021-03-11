@@ -26,24 +26,24 @@ namespace TestConsoleApplication
 
 			//string id = "a3a9f38c-8591-4748-8831-801a372d4878";
 
-
+			/*
 			string itemId = "2977fb30-f64e-42e7-96eb-edc83520ed4d";
 
-			//Console.WriteLine(await getModule.GetMainObjectInfoAsync(itemId));
-			//Console.WriteLine("**************************************************************************");
+			Console.WriteLine(await getModule.GetMainObjectInfoAsync(itemId));
+			Console.WriteLine("**************************************************************************");
 
 
-			//Console.WriteLine(await getModule.GetJobAmountAsync(itemId));
-			//Console.WriteLine("**************************************************************************");
+			Console.WriteLine(await getModule.GetJobAmountAsync(itemId));
+			Console.WriteLine("**************************************************************************");
 
 
 			Console.WriteLine(await postModule.GetVolumeOfWorkByYearAsync(itemId));
 			Console.WriteLine("**************************************************************************");
 
 
-			//Console.WriteLine(await postModule.GetJobAmountArticleAsync(itemId));
-			//Console.WriteLine("**************************************************************************");
-
+			Console.WriteLine(await postModule.GetJobAmountArticleAsync(itemId));
+			Console.WriteLine("**************************************************************************");
+			*/
 
 
 			//foreach (string id in File.ReadLines(@"d:\UID.csv"))
@@ -118,7 +118,7 @@ namespace TestConsoleApplication
 			File.WriteAllLines(@"d:\out.csv", roadSections.Select(d => d.Value + ";" + d.Key));
 			*/
 
-
+			//var v = await postModule.GetGetRoadSectionsAsync(0, 15);
 
 			Console.WriteLine("Обработка завершена");
 			Console.WriteLine($"Время обработки: {DateTime.Now - start}");

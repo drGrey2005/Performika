@@ -35,8 +35,10 @@ namespace PerformikaService
 					services.AddQuartz(q =>
 					{
 						q.UseMicrosoftDependencyInjectionScopedJobFactory();
-						
-						q.AddJobAndTrigger<DataUpdaterJob>(hostContext.Configuration);
+
+						q.AddJobAndTrigger<DataUpdaterJobLight>(hostContext.Configuration);
+						q.AddJobAndTrigger<DataUpdaterJobMedium>(hostContext.Configuration);
+
 					});
 
 					services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
