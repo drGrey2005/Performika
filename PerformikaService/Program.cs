@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
+using PerformikaAdaptingService;
 using PerformikaDb;
 using PerformikaLib;
 using PerformikaService.Jobs;
@@ -8,41 +9,43 @@ using Quartz;
 
 namespace PerformikaService
 {
-	public class Program
-	{
-		public static void Main(string[] args)
-		{
-			CreateHostBuilder(args).Build().Run();
-		}
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            CreateHostBuilder(args).Build().Run();
+        }
 
-		public static IHostBuilder CreateHostBuilder(string[] args) =>
-			Host.CreateDefaultBuilder(args)
-				.UseWindowsService()
-				.ConfigureServices((hostContext, services) =>
-				{
-					IConfiguration configuration = hostContext.Configuration;
-					string baseAddress = configuration["PerformikaSettings:BaseAddress"];
-					string login = configuration["PerformikaSettings:Login"];
-					string password = configuration["PerformikaSettings:Password"];
-					string connStr = configuration.GetConnectionString("postgresConnection");
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .UseWindowsService()
+                .ConfigureServices((hostContext, services) =>
+                {
+                    IConfiguration configuration = hostContext.Configuration;
+                    string baseAddress = configuration["PerformikaSettings:BaseAddress"];
+                    string login = configuration["PerformikaSettings:Login"];
+                    string password = configuration["PerformikaSettings:Password"];
+                    string connStr = configuration.GetConnectionString("postgresConnection");
 
 
-					services.AddHostedService<Worker>();
+                    services.AddHostedService<Worker>();
 
-					services.AddSingleton(context => new PerformikaPostModule(baseAddress, login, password));
-					services.AddSingleton(context => new DbLoader(connStr));
+                    services.AddSingleton(context => new PerformikaPostModule(baseAddress, login, password));
+                    services.AddSingleton(context => new DbLoader(connStr));
+                    services.AddSingleton<PerformikaDataAdapter>();
 
-					services.AddQuartz(q =>
-					{
-						q.UseMicrosoftDependencyInjectionScopedJobFactory();
+                    services.AddQuartz(q =>
+                    {
+                        q.UseMicrosoftDependencyInjectionScopedJobFactory();
 
-						q.AddJobAndTrigger<DataUpdaterJobLight>(hostContext.Configuration);
-						q.AddJobAndTrigger<DataUpdaterJobMedium>(hostContext.Configuration);
+                        q.AddJobAndTrigger<DataUpdaterJobLight>(hostContext.Configuration);
+                        q.AddJobAndTrigger<DataUpdaterJobMedium>(hostContext.Configuration);
+                        q.AddJobAndTrigger<DeleteJob>(hostContext.Configuration);
 
-					});
+                    });
 
-					services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
+                    services.AddQuartzHostedService(q => q.WaitForJobsToComplete = true);
 
-				});
-	}
+                });
+    }
 }

@@ -18,7 +18,7 @@ namespace PerformikaLib
     {
         private readonly PerformikaApiConnector _connector;
 
-        private Logger _logger = LogManager.GetCurrentClassLogger();
+        private readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         private readonly Dictionary<string, dynamic> _rowsMapping = new Dictionary<string, dynamic>();
         private readonly Dictionary<string, string> _lookups = new Dictionary<string, string>();
@@ -119,7 +119,7 @@ namespace PerformikaLib
         }
 
         //Отслеживание объектов для удаления
-        public async Task<List<Guid>> GetUids(string url, string workspaceId)
+        public async Task<List<Guid>> GetUidsAsync(string url, string workspaceId)
         {
 
             List<Guid> guids = new List<Guid>();
@@ -137,7 +137,7 @@ namespace PerformikaLib
                 {
                     guids.Add(Guid.Parse(row.id.ToString()));
                 }
-               
+
                 return guids;
             }
             catch (Exception ex)

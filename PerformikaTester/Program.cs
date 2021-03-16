@@ -127,7 +127,11 @@ namespace TestConsoleApplication
 
             try
             {
-                List<Guid> performikaGuids = await postModule.GetUids("/gridview?definitionId=b4276b7c-a409-434d-8a0a-6ed74fa24ca0&_=1612775221043", "743d464a-2310-4a9d-b71d-32021b7a9961");
+
+              //  int count = await postModule.DeleteProgramsAsync();
+
+
+                List<Guid> performikaGuids = await postModule.GetUidsAsync("/gridview?definitionId=b4276b7c-a409-434d-8a0a-6ed74fa24ca0&_=1612775221043", "743d464a-2310-4a9d-b71d-32021b7a9961");
                 int count = loader.DeleteRows("public.\"Program\"", "\"ProgramUid\"", performikaGuids);
                 Console.WriteLine($"Удалено {count} записей.");
 

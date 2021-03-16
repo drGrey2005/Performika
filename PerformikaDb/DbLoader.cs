@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NLog;
 using Npgsql;
 using NpgsqlTypes;
 using PerformikaLib.Entities;
@@ -13,6 +14,8 @@ namespace PerformikaDb
     public class DbLoader
     {
         private readonly string _connectionString;
+
+        private readonly ILogger _logger = LogManager.GetCurrentClassLogger();
 
         public DbLoader(string connectionString) => _connectionString = connectionString;
 
@@ -436,10 +439,11 @@ namespace PerformikaDb
         /// <param name="tableName">Имя таблицы для обработки</param>
         /// <param name="columnName">Название столбца с идентификаторами</param>
         /// <param name="performikaUids">Значения для удаления</param>
+        /// <returns>Число удаленных записей</returns>
         public int DeleteRows(string tableName, string columnName, List<Guid> performikaUids)
         {
             List<Guid> postgresUids = GetUids(tableName, columnName);
-
+            _logger.Info($"Выявлены данные в таблице {tableName} для удаления: {string.Join(", ", postgresUids.Except(performikaUids).Select(val => $"'{val}'"))}");
             using (NpgsqlConnection conn = GetConnection())
             {
                 NpgsqlCommand com =
