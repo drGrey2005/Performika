@@ -21,8 +21,11 @@ namespace PerformikaService.Jobs
         {
             _logger.Info($"Инициирована служба удаления данных.");
 
-            //Удаление программ работ, не найденных в перформике
+            //Удаление программ работ, не найденных в Перформике
             await DeletePrograms();
+
+            //Удаление объектов программ работ, не найденных в Перформике
+            await DeleteProgramObjects();
 
             _logger.Info("Работа службы удаления данных завершена.");
         }
@@ -37,8 +40,23 @@ namespace PerformikaService.Jobs
             }
             catch (Exception ex)
             {
-                _logger.Error($"Ошибка удаления данных: {ex.Message}");
+                _logger.Error($"Ошибка удаления программ работ: {ex.Message}");
             }
         }
+
+        private async Task DeleteProgramObjects()
+        {
+            try
+            {
+                _logger.Info("Запуск процесса удаления объектов программ работ");
+                int count = await _performikaDataAdapter.DeletePrograms();
+                _logger.Info($"Процесс удаления объектов программ работ завершен. Удалено {count} записей.");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error($"Ошибка удаления объектов программ работ: {ex.Message}");
+            }
+        }
+
     }
 }
