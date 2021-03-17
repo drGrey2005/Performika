@@ -443,12 +443,19 @@ namespace PerformikaDb
         public int DeleteRows(string tableName, string columnName, List<Guid> performikaUids)
         {
             List<Guid> postgresUids = GetUids(tableName, columnName);
-            _logger.Info($"Выявлены данные в таблице {tableName} для удаления: {string.Join(", ", postgresUids.Except(performikaUids).Select(val => $"'{val}'"))}");
+
+            // List<Guid> common = performikaUids.Intersect(postgresUids).ToList();
+
+            _logger.Info($"Выявлены данные в таблице {tableName} для удаления: {string.Join(", ", postgresUids.Except(performikaUids).Where(val => val != Guid.Empty).Select(val => $"'{val}'"))}");
             using (NpgsqlConnection conn = GetConnection())
             {
+                if (!postgresUids.Except(performikaUids).Any())
+                {
+                    return 0;
+                }
                 NpgsqlCommand com =
                     new NpgsqlCommand(
-                        $@"DELETE FROM {tableName} WHERE {columnName} IN ({string.Join(", ", postgresUids.Except(performikaUids).Select(val => $"'{val}'"))})",
+                        $@"DELETE FROM {tableName} WHERE {columnName} IN ({string.Join(", ", postgresUids.Except(performikaUids).Where(val => val != Guid.Empty).Select(val => $"'{val}'"))})",
                         conn);
                 conn.Open();
                 int count = com.ExecuteNonQuery();
